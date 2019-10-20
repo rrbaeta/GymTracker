@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.gymtracker.Model.Measurement;
 import com.example.gymtracker.R;
@@ -42,6 +43,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         weightBtn.setOnClickListener(this);
 
+        measurement = new Measurement();
+
         return rootView;
     }
 
@@ -59,21 +62,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private void addWeight()
     {
+        measurement.setWeight(Float.valueOf(weightInput.getText().toString()));
 
-        float peso = Float.valueOf(weightInput.getText().toString());
-
-        //Measurement weight = new Measurement(peso);
-
-        measurement.setWeight(peso);
-
-        //weightOutput.setText(String.valueOf(measurement.getWeight()));
-
-        //Measurement newMeasurement = new Measurement(peso);
-
-        //weight.setWeight(peso);
-
-        //String gordo = String.valueOf(peso);
-        //weightOutput.setText(weight.getWeight());
+        weightOutput.setText(String.valueOf(measurement.getWeight()));
     }
 
 }
