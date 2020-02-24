@@ -4,15 +4,15 @@ public class Measurement {
 
     private float weight;
 
-    //Constructor
-    public Measurement(float weight)
-    {
-        this.setWeight(weight);
-    }
-
     //Default Constructor
     public Measurement()
     {
+    }
+
+    //Main Constructor
+    public Measurement(float weight)
+    {
+        this.setWeight(weight);
     }
 
     public float getWeight() {
