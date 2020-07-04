@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,16 @@ import android.widget.TextView;
 
 import com.example.gymtracker.Model.Measurement;
 import com.example.gymtracker.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
@@ -31,8 +37,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private Measurement measurement;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("weight");
+    private static final String TAG = "YOUR-TAG-NAME";
+    private String KEY_WEIGHT = "weight";
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -51,24 +59,35 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         measurement = new Measurement();
 
-        //Read data from Firebase
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Float weight = dataSnapshot.getValue(Float.class);
+        //Read data from Cloud Firestore
+        db.collection("users")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + "user" + document.getData());
 
-                measurement.setWeight(Float.valueOf(weight));
+                                if(document.exists())
+                                {
 
-                weightOutput.setText(String.valueOf(measurement.getWeight()));
-            }
+                                    float weight = document.getDouble(KEY_WEIGHT).floatValue();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    measurement.setWeight(weight);
 
-                //weightOutput.setText(String.valueOf(measurement.getWeight()));
-                //Failed to Read Value
-            }
-        });
+                                    weightOutput.setText("Weight: " + String.valueOf(measurement.getWeight()) + " Kg");
+
+                                }
+                                else{
+                                    //Toast.makeText(this, "Document does not exist", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
         return rootView;
     }
@@ -90,8 +109,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     {
         measurement.setWeight(Float.valueOf(weightInput.getText().toString()));
 
-        //Write weight value to Firebase
-        myRef.setValue(measurement.getWeight());
+        //Write weight value to Cloud Firestore
+        Map<String, Object> user = new HashMap<>();
+        user.put(KEY_WEIGHT, Double.valueOf(measurement.getWeight()));
+
+        db.collection("users").document("user")
+                .set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+
     }
 
 }

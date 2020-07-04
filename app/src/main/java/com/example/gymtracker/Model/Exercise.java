@@ -7,24 +7,18 @@ public class Exercise {
 
     private float weightLifted;
     private int maximumReps;
-    private List<String> exerciseTitles = new ArrayList<>();
+    private String title;
 
-    //Default Constructor
-    public Exercise() //Default Constructor
+
+    public Exercise()
     {
-        exerciseTitles.add("Bench Press");
-        exerciseTitles.add("Leg Press");
+        //Default Constructor
     }
 
-    public Exercise(String exerciseTitles, float weightLifted, int maximumReps)
+    public Exercise(float weightLifted, int maximumReps)
     {
         this.setWeightLifted(weightLifted);
         this.setMaximumReps(maximumReps);
-
-
-
-        this.exerciseTitles.add("Bench Press");
-        this.exerciseTitles.add("Leg Press");
     }
 
     public float getWeightLifted() {
@@ -43,8 +37,10 @@ public class Exercise {
         this.maximumReps = maximumReps;
     }
 
-    public List<String> getExerciseTitles() {
-        return exerciseTitles;
+
+    //probably wrong
+    public String getTitle() {
+        return title;
     }
 
 }

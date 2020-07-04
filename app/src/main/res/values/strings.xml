@@ -6,4 +6,8 @@
     <string name="button">Button</string>
     <string name="your_weight">Your Weight</string>
     <string name="insert_your_weight">Insert your weight</string>
+    <string name="listImage" />
+
+    <string name="facebook_app_id">692357958272179</string>
+    <string name="fb_login_protocol_scheme">fb692357958272179</string>
 </resources>

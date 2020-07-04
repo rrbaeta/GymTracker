@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<exercises>
+
+    <exercise>
+        <id>1</id>
+        <title>Bench Press</title>
+    </exercise>
+
+    <exercise>
+        <id>2</id>
+        <title>Leg Press</title>
+    </exercise>
+
+    <exercise>
+        <id>3</id>
+        <title>Skullcrusher</title>
+    </exercise>
+
+    <exercise>
+        <id>4</id>
+        <title>Shoulder Press</title>
+    </exercise>
+
+    <exercise>
+        <id>5</id>
+        <title>Upright Row</title>
+    </exercise>
+
+    <exercise>
+        <id>6</id>
+        <title>Overhead Press</title>
+    </exercise>
+
+    <exercise>
+        <id>7</id>
+        <title>Arnold Press</title>
+    </exercise>
+
+    <exercise>
+        <id>8</id>
+        <title>Dead Lift</title>
+    </exercise>
+
+    <exercise>
+        <id>9</id>
+        <title>Seated Row</title>
+    </exercise>
+
+    <exercise>
+        <id>10</id>
+        <title>Chest Fly</title>
+    </exercise>
+
+    <exercise>
+        <id>11</id>
+        <title>Squat</title>
+    </exercise>
+
+    <exercise>
+        <id>12</id>
+        <title>Seated Leg Curl</title>
+    </exercise>
+
+    <exercise>
+        <id>13</id>
+        <title>Lying Leg Curl</title>
+    </exercise>
+
+    <exercise>
+        <id>14</id>
+        <title>Hip Abductor</title>
+    </exercise>
+
+    <exercise>
+        <id>15</id>
+        <title>Hip Adductor</title>
+    </exercise>
+
+    <exercise>
+        <id>16</id>
+        <title>Leg Extension</title>
+    </exercise>
+
+    <exercise>
+        <id>17</id>
+        <title>Standing Calf Raise</title>
+    </exercise>
+
+    <exercise>
+        <id>18</id>
+        <title>Seated Calf Raise</title>
+    </exercise>
+
+    <exercise>
+        <id>19</id>
+        <title>Crunch</title>
+    </exercise>
+
+    <exercise>
+        <id>20</id>
+        <title>Wide Pull Up</title>
+    </exercise>
+
+</exercises>

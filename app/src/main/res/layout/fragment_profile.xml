@@ -5,6 +5,7 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBlack"
     tools:context=".Fragments.ProfileFragment">
 
     <Button
@@ -21,6 +22,9 @@
         android:layout_height="40dp"
         android:ems="10"
         android:hint="@string/your_weight"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:textColorHint="@color/colorWhite"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/weightLiftedInput" />
 
@@ -30,10 +34,13 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/insert_your_weight"
+        android:importantForAutofill="no"
         android:inputType="numberDecimal"
+        android:textColor="@color/colorWhite"
+        android:textColorHint="@color/colorWhite"
+        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/weightBtn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
