@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.gymtracker.Activity.MainActivity;
@@ -21,8 +23,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -33,14 +33,11 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.concurrent.Executor;
-
 public class LoginFragment extends Fragment {
 
     private FirebaseAuth mAuth;
     private CallbackManager mCallbackManager;
     private LoginButton loginButton;
-    private FirebaseAuth.AuthStateListener authStateListener;
 
     private static final String TAG = "YOUR-TAG-NAME";
 
@@ -59,7 +56,6 @@ public class LoginFragment extends Fragment {
         mCallbackManager = CallbackManager.Factory.create();
         loginButton = rootView.findViewById(R.id.login_button);
         loginButton.setFragment(this);
-        //LoginButton loginButton = mBinding.buttonFacebookLogin;
         loginButton.setReadPermissions("email", "public_profile");
 
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -81,21 +77,6 @@ public class LoginFragment extends Fragment {
                 // ...
             }
         });
-
-//        authStateListener = new FirebaseAuth.AuthStateListener(){
-//            @Override
-//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-//
-//                FirebaseUser user = FirebaseAuth.getCurrentUser();
-//
-//                if(user != null){
-//                    updateUI(user);
-//                }
-//                else {
-//                    updateUI(null);
-//                }
-//            }
-//        };
 
 
         return rootView;
@@ -156,14 +137,6 @@ public class LoginFragment extends Fragment {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (authStateListener != null){
-            mAuth.removeAuthStateListener(authStateListener);
-        }
     }
 
 
