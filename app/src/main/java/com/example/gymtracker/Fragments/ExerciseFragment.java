@@ -32,9 +32,9 @@ public class ExerciseFragment extends Fragment {
     private ListView exercisesListView;
 
     private static final String TAG = "YOUR-TAG-NAME";
-    private String KEY_TITLE = "title";
     private String title;
 
+    private ExerciseData exerciseData;
     private ArrayAdapter<ExerciseData> exerciseDataArrayAdapter;
     private ArrayList<ExerciseData> exerciseDataArrayList = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class ExerciseFragment extends Fragment {
 
         exercisesListView = rootView.findViewById(R.id.exercisesListView);
 
-        final ExerciseData exerciseData = new ExerciseData(title);
+        exerciseData = new ExerciseData(title);
 
         if(exerciseDataArrayList != null)
         {
@@ -98,7 +98,8 @@ public class ExerciseFragment extends Fragment {
                 Toast.makeText(getContext(),itemClicked + "", Toast.LENGTH_SHORT).show();
 
                 //TODO need to fix the data sent to the ExercisePageFragment, (probably need to send the all ExerciseData Class)
-                bundle.putString("itemClicked", itemClicked);
+                //This sends the document selected id
+                bundle.putString("itemClickedId", itemClickedId);
                 Navigation.findNavController(rootView).navigate(R.id.action_nav_exercise_to_exercisePageFragment, bundle);
 
             }

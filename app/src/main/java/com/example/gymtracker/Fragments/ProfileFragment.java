@@ -1,6 +1,7 @@
 package com.example.gymtracker.Fragments;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,12 +19,14 @@ import android.widget.TextView;
 
 import com.example.gymtracker.Model.Measurement;
 import com.example.gymtracker.R;
+import com.facebook.CallbackManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -73,30 +76,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         //Read data from Cloud Firestore
         db.collection("users")
+                .document("user")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + "user" + document.getData());
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
-                                if(document.exists())
-                                {
+                                float weight = document.getDouble(KEY_WEIGHT).floatValue();
 
-                                    float weight = document.getDouble(KEY_WEIGHT).floatValue();
+                                measurement.setWeight(weight);
 
-                                    measurement.setWeight(weight);
+                                weightOutput.setText("Weight: " + String.valueOf(measurement.getWeight()) + " Kg");
 
-                                    weightOutput.setText("Weight: " + String.valueOf(measurement.getWeight()) + " Kg");
-
-                                }
-                                else{
-                                    //Toast.makeText(this, "Document does not exist", Toast.LENGTH_SHORT).show();
-                                }
+                            } else {
+                                Log.d(TAG, "No such document");
                             }
                         } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
+                            Log.d(TAG, "get failed with ", task.getException());
                         }
                     }
                 });

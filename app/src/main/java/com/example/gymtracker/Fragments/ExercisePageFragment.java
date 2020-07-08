@@ -7,20 +7,29 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.gymtracker.Model.Exercise;
+import com.example.gymtracker.Model.ExerciseData;
 import com.example.gymtracker.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class ExercisePageFragment extends Fragment implements View.OnClickListener {
@@ -32,6 +41,12 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
     private TextView weightAndRepsView;
 
     private Exercise exercise;
+    private ExerciseData exerciseData;
+    private static final String TAG = "YOUR-TAG-NAME";
+    private String title;
+    private String KEY_TITLE = "title";
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference weightLiftedRef= database.getReference("weightLifted");
@@ -52,13 +67,46 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
         weightAndRepsBtn = rootView.findViewById(R.id.weightAndRepsBtn);
         weightAndRepsView = rootView.findViewById(R.id.weightandRepsView);
 
-        exercise = new Exercise();
+        final String itemClickedId = getArguments().getString("itemClickedId");
 
-        exerciseName.setText(getArguments().getString("itemClicked"));
+        exercise = new Exercise();
+        exerciseData = new ExerciseData();
 
         weightAndRepsBtn.setOnClickListener(this);
 
-        //Read data from Firebase
+        //Read data from Cloud Firestore
+        db.collection("exercise_list")
+                .document(itemClickedId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+
+                                String exerciseTitle = document.getString(KEY_TITLE);
+                                String exerciseId = document.getId();
+
+                                exerciseData.setTitle(exerciseTitle);
+                                exerciseData.setExerciseId(exerciseId);
+
+                                exerciseName.setText(exerciseData.getTitle());
+
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+//        exerciseName.setText(exerciseData.getTitle());
+
+
+        //Read data from Firebase Realtime Database
         weightLiftedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -116,9 +164,11 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
         exercise.setWeightLifted(Float.valueOf(weightLiftedInput.getText().toString()));
         exercise.setMaximumReps(Integer.valueOf(repsInput.getText().toString()));
 
-        //Write weight value to Firebase
+        //Write data to Firebase Realtime Database
         weightLiftedRef.setValue(exercise.getWeightLifted());
         maximumRepsRef.setValue(exercise.getMaximumReps());
+
+        //Write data to Firebase Cloud Firestore
     }
 
 }
