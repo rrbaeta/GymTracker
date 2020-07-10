@@ -19,13 +19,14 @@ import android.widget.TextView;
 
 import com.example.gymtracker.Model.Measurement;
 import com.example.gymtracker.R;
-import com.facebook.CallbackManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -50,6 +51,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "YOUR-TAG-NAME";
     private String KEY_WEIGHT = "weight";
+    private String KEY_UID = "uid";
+    private String uid;
+    private String exerciseDocId = null;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -74,17 +78,21 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         measurement = new Measurement();
 
-        //Read data from Cloud Firestore
+
+        //TODO onStart() probably shouldn't be called here
+        onStart();
+
         db.collection("users")
-                .document("user")
+                .whereEqualTo(KEY_UID, uid)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+
+                                exerciseDocId = document.getId();
 
                                 float weight = document.getDouble(KEY_WEIGHT).floatValue();
 
@@ -92,17 +100,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                                 weightOutput.setText("Weight: " + String.valueOf(measurement.getWeight()) + " Kg");
 
-                            } else {
-                                Log.d(TAG, "No such document");
                             }
                         } else {
-                            Log.d(TAG, "get failed with ", task.getException());
+                            Log.w(TAG, "Error getting documents.", task.getException());
                         }
                     }
                 });
 
+
         return rootView;
     }
+
 
     //all onClicks
     @Override
@@ -117,30 +125,85 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     }
 
+
     private void addWeight()
     {
         measurement.setWeight(Float.valueOf(weightInput.getText().toString()));
 
-        //Write weight value to Cloud Firestore
-        Map<String, Object> user = new HashMap<>();
-        user.put(KEY_WEIGHT, Double.valueOf(measurement.getWeight()));
 
-        db.collection("users").document("user")
-                .set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+        //Check if the user has set the data before Cloud Firestore
+        db.collection("users")
+                .whereEqualTo(KEY_UID, uid)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+
+                                exerciseDocId = document.getId();
+
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
                     }
                 });
 
+
+        // Update/create the user document
+        if (exerciseDocId == null)
+        {
+
+            //Write weight value to Cloud Firestore
+            Map<String, Object> user = new HashMap<>();
+            user.put(KEY_WEIGHT, Double.valueOf(measurement.getWeight()));
+            user.put(KEY_UID, uid);
+
+            db.collection("users")
+                    .add(user)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
+
+        }
+        else if (exerciseDocId != null)
+        {
+
+            //Write weight value to Cloud Firestore
+            Map<String, Object> user = new HashMap<>();
+            user.put(KEY_WEIGHT, Double.valueOf(measurement.getWeight()));
+
+            db.collection("users")
+                    .document(exerciseDocId)
+                    .update(user)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+
+        }
+
     }
+
 
     @Override
     public void onStart() {
@@ -150,9 +213,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         updateUI(currentUser);
     }
 
+
     private void updateUI(FirebaseUser user){
         if(user != null)
         {
+
+            //get user ID
+            uid = user.getUid();
+
             userName.setText(user.getDisplayName());
             if (user.getPhotoUrl() != null)
             {
