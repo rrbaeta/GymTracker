@@ -97,7 +97,6 @@ public class ExerciseFragment extends Fragment {
                 String itemClicked = exerciseData1.getTitle();
                 Toast.makeText(getContext(),itemClicked + "", Toast.LENGTH_SHORT).show();
 
-                //TODO need to fix the data sent to the ExercisePageFragment, (probably need to send the all ExerciseData Class)
                 //This sends the document selected id
                 bundle.putString("itemClickedId", itemClickedId);
                 Navigation.findNavController(rootView).navigate(R.id.action_nav_exercise_to_exercisePageFragment, bundle);

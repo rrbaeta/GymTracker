@@ -1,7 +1,6 @@
 package com.example.gymtracker.Fragments;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,9 +24,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -53,7 +50,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private String KEY_WEIGHT = "weight";
     private String KEY_UID = "uid";
     private String uid;
-    private String exerciseDocId = null;
+    private String userDocId = null;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -82,6 +79,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //TODO onStart() probably shouldn't be called here
         onStart();
 
+        //Read user data from Cloud Firestore
         db.collection("users")
                 .whereEqualTo(KEY_UID, uid)
                 .get()
@@ -92,7 +90,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
 
-                                exerciseDocId = document.getId();
+                                userDocId = document.getId();
 
                                 float weight = document.getDouble(KEY_WEIGHT).floatValue();
 
@@ -131,7 +129,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         measurement.setWeight(Float.valueOf(weightInput.getText().toString()));
 
 
-        //Check if the user has set the data before Cloud Firestore
+        //Check if the user has set the data before to Cloud Firestore
         db.collection("users")
                 .whereEqualTo(KEY_UID, uid)
                 .get()
@@ -142,7 +140,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
 
-                                exerciseDocId = document.getId();
+                                userDocId = document.getId();
 
                             }
                         } else {
@@ -153,7 +151,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
 
         // Update/create the user document
-        if (exerciseDocId == null)
+        if (userDocId == null)
         {
 
             //Write weight value to Cloud Firestore
@@ -177,7 +175,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     });
 
         }
-        else if (exerciseDocId != null)
+        else if (userDocId != null)
         {
 
             //Write weight value to Cloud Firestore
@@ -185,7 +183,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             user.put(KEY_WEIGHT, Double.valueOf(measurement.getWeight()));
 
             db.collection("users")
-                    .document(exerciseDocId)
+                    .document(userDocId)
                     .update(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

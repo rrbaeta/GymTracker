@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,16 +19,24 @@ import com.example.gymtracker.Model.Exercise;
 import com.example.gymtracker.Model.ExerciseData;
 import com.example.gymtracker.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ExercisePageFragment extends Fragment implements View.OnClickListener {
@@ -42,15 +49,21 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
 
     private Exercise exercise;
     private ExerciseData exerciseData;
+    private FirebaseAuth mAuth;
+
     private static final String TAG = "YOUR-TAG-NAME";
     private String title;
+    private String uid;
     private String KEY_TITLE = "title";
+    private String KEY_UID = "uid";
+    private String KEY_ExerciseID = "exerciseId";
+    private String KEY_WeightLifted = "weightLifted";
+    private String KEY_MaximumReps = "maximumReps";
+    private String exerciseId;
+    private String userExerciseDataDocId = null;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference weightLiftedRef= database.getReference("weightLifted");
-    DatabaseReference maximumRepsRef = database.getReference("maximumReps");
 
     public ExercisePageFragment() {
         // Required empty public constructor
@@ -61,22 +74,27 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_exercise_page, container, false);
 
+        mAuth = FirebaseAuth.getInstance();
+
         exerciseName = rootView.findViewById(R.id.exerciseName);
         weightLiftedInput = rootView.findViewById(R.id.weightLiftedInput);
         repsInput = rootView.findViewById(R.id.repsInput);
         weightAndRepsBtn = rootView.findViewById(R.id.weightAndRepsBtn);
         weightAndRepsView = rootView.findViewById(R.id.weightandRepsView);
 
-        final String itemClickedId = getArguments().getString("itemClickedId");
+        exerciseId = getArguments().getString("itemClickedId");
 
         exercise = new Exercise();
         exerciseData = new ExerciseData();
 
+        //TODO onStart() probably shouldn't be called here
+        onStart();
+
         weightAndRepsBtn.setOnClickListener(this);
 
-        //Read data from Cloud Firestore
+        //Read exercise data from Cloud Firestore
         db.collection("exercise_list")
-                .document(itemClickedId)
+                .document(exerciseId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -103,44 +121,35 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
                     }
                 });
 
-//        exerciseName.setText(exerciseData.getTitle());
 
-
-        //Read data from Firebase Realtime Database
-        weightLiftedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Float weightLifted = dataSnapshot.getValue(Float.class);
-
-                exercise.setWeightLifted(Float.valueOf(weightLifted));
-
-                //Read data from Firebase
-                maximumRepsRef.addValueEventListener(new ValueEventListener() {
+        //Read the user data for the exercise from Cloud Firestore
+        db.collection("userExerciseData")
+                .whereEqualTo(KEY_UID, uid)
+                .whereEqualTo(KEY_ExerciseID, exerciseId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Integer maximumReps = dataSnapshot.getValue(Integer.class);
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
 
-                        exercise.setMaximumReps(Integer.valueOf(maximumReps));
+                                userExerciseDataDocId = document.getId();
 
-                        weightAndRepsView.setText("Weight Lifted: " + String.valueOf(exercise.getWeightLifted()) + "\nMaximum Reps: " + String.valueOf(exercise.getMaximumReps()));
-                    }
+                                float weightLifted = document.getDouble(KEY_WeightLifted).floatValue();
+                                int maximumReps = document.getLong(KEY_MaximumReps).intValue();
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                exercise.setWeightLifted(weightLifted);
+                                exercise.setMaximumReps(maximumReps);
 
-                        //weightOutput.setText(String.valueOf(measurement.getWeight()));
-                        //Failed to Read Value
+                                weightAndRepsView.setText("Weight Lifted: " + String.valueOf(exercise.getWeightLifted()) + "\nMaximum Reps: " + String.valueOf(exercise.getMaximumReps()));
+
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
                     }
                 });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                //weightOutput.setText(String.valueOf(measurement.getWeight()));
-                //Failed to Read Value
-            }
-        });
 
         return rootView;
     }
@@ -159,16 +168,111 @@ public class ExercisePageFragment extends Fragment implements View.OnClickListen
 
     }
 
+
     private void addWeightLiftedAndReps()
     {
         exercise.setWeightLifted(Float.valueOf(weightLiftedInput.getText().toString()));
         exercise.setMaximumReps(Integer.valueOf(repsInput.getText().toString()));
 
-        //Write data to Firebase Realtime Database
-        weightLiftedRef.setValue(exercise.getWeightLifted());
-        maximumRepsRef.setValue(exercise.getMaximumReps());
 
         //Write data to Firebase Cloud Firestore
+        //Check if the user has set the data before to Cloud Firestore
+        db.collection("userExerciseData")
+                .whereEqualTo(KEY_UID, uid)
+                .whereEqualTo(KEY_ExerciseID, exerciseId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+
+                                userExerciseDataDocId = document.getId();
+
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+
+        // Update/create the user document
+        if (userExerciseDataDocId == null)
+        {
+
+            //Write weightLifted and reps value to Cloud Firestore
+            Map<String, Object> userExerciseData = new HashMap<>();
+            userExerciseData.put(KEY_UID, uid);
+            userExerciseData.put(KEY_ExerciseID, exerciseId);
+            userExerciseData.put(KEY_WeightLifted, Double.valueOf(exercise.getWeightLifted()));
+            userExerciseData.put(KEY_MaximumReps, exercise.getMaximumReps());
+
+            db.collection("userExerciseData")
+                    .add(userExerciseData)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
+
+        }
+        else if (userExerciseDataDocId != null)
+        {
+
+            //Write weightLifted and reps value to Cloud Firestore
+            Map<String, Object> userExerciseData = new HashMap<>();
+            userExerciseData.put(KEY_WeightLifted, Double.valueOf(exercise.getWeightLifted()));
+            userExerciseData.put(KEY_MaximumReps, exercise.getMaximumReps());
+
+            db.collection("userExerciseData")
+                    .document(userExerciseDataDocId)
+                    .update(userExerciseData)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+        }
+
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
+    }
+
+
+    private void updateUI(FirebaseUser user){
+        if(user != null)
+        {
+
+            //get user ID
+            uid = user.getUid();
+
+        }
+        else
+        {
+        }
+
     }
 
 }
