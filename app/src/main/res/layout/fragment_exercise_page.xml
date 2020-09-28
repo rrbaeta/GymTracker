@@ -5,16 +5,20 @@
     android:id="@+id/we"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBlack"
     tools:context=".Fragments.ExercisePageFragment">
 
     <EditText
         android:id="@+id/weightLiftedInput"
-        android:layout_width="400px"
+        android:layout_width="600px"
         android:layout_height="100px"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="350dp"
+        android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:hint="Max Weight"
         android:inputType="numberDecimal"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/exerciseName" />
 
@@ -22,8 +26,9 @@
         android:id="@+id/exerciseName"
         android:layout_width="250dp"
         android:layout_height="35dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:textAlignment="center"
+        android:textColor="@color/colorWhite"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,31 +37,38 @@
 
     <EditText
         android:id="@+id/repsInput"
-        android:layout_width="400px"
+        android:layout_width="600px"
         android:layout_height="100px"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:hint="Number of Reps"
         android:inputType="numberDecimal"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/weightLiftedInput"
-        app:layout_constraintTop_toBottomOf="@+id/exerciseName" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/weightLiftedInput" />
 
     <Button
         android:id="@+id/weightAndRepsBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="100px"
-        android:layout_marginTop="300dp"
+        android:layout_width="140dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_button"
         android:text="Button"
+        android:textColor="@color/colorWhite"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/repsInput"
-        app:layout_constraintTop_toBottomOf="@+id/exerciseName" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/repsInput" />
 
     <TextView
         android:id="@+id/weightandRepsView"
         android:layout_width="600px"
         android:layout_height="100px"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorWhite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/weightLiftedInput" />
+        app:layout_constraintTop_toBottomOf="@+id/weightAndRepsBtn" />
 </androidx.constraintlayout.widget.ConstraintLayout>
