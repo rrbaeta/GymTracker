@@ -10,13 +10,16 @@
 
     <EditText
         android:id="@+id/weightLiftedInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="240dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="60dp"
+        android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:hint="@string/insert_your_weight"
         android:importantForAutofill="no"
         android:inputType="numberDecimal"
+        android:textAlignment="center"
         android:textColor="@color/colorWhite"
         android:textColorHint="@color/colorWhite"
         android:textStyle="bold"
@@ -43,10 +46,11 @@
 
     <Button
         android:id="@+id/weightBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="45dp"
         android:layout_marginTop="60dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/rounded_button"
         android:text="@string/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userName" />
