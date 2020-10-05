@@ -12,7 +12,7 @@
         android:id="@+id/weightLiftedInput"
         android:layout_width="240dp"
         android:layout_height="40dp"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="50dp"
         android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:hint="Max Weight"
@@ -20,7 +20,7 @@
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exerciseName" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <TextView
         android:id="@+id/exerciseName"
@@ -72,4 +72,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/weightAndRepsBtn" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="350dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/placeholder_exercises"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exerciseName" />
 </androidx.constraintlayout.widget.ConstraintLayout>
